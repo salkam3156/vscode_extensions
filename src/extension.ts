@@ -3,14 +3,22 @@ import * as vscode from "vscode";
 interface Task {
   name: string;
   filePick: boolean;
-  value: string;
+  requiredFileFilters: string;
+  commandString: string;
 }
 
 const tasks: Task[] = [
   {
     name: "Run JSON Mock Server",
     filePick: true,
-    value: "json-server --watch db.json"
+    commandString: `json-server --watch db.json`,
+    requiredFileFilters: "json"
+  },
+  {
+    name: "Serve the application",
+    filePick: false,
+    commandString: "npm run",
+    requiredFileFilters: ""
   }
 ];
 
@@ -31,7 +39,14 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
 
-      let command = tasks.find(task => task.name === choice)?.value;
+      let chosenTask = tasks.find(task => task.name === choice);
+
+      if (chosenTask?.filePick) {
+        vscode.window.showOpenDialog({
+          canSelectFiles: true,
+          filters: { "": [`${chosenTask.requiredFileFilters}`] }
+        });
+      }
 
       vscode.window.showInformationMessage("Nice");
     }
