@@ -41,7 +41,6 @@ export function activate(context: vscode.ExtensionContext) {
         .then(prev => {
           if (prev === "Yes") {
             tasks.forEach(task => executeTask(task));
-            return;
           }
         });
 
