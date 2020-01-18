@@ -6,6 +6,7 @@ interface Task {
   name: string;
   filePick: boolean;
   requiredFileFilters: string;
+  //TODO: parametrize in case file is not the last parameter in the command
   commandString: string;
 }
 
@@ -13,7 +14,6 @@ const tasks: Task[] = [
   {
     name: "Run JSON Mock Server",
     filePick: true,
-    //TODO: parametrize in case file is not the last parameter in the command
     commandString: `json-server --watch`,
     requiredFileFilters: "json"
   },
@@ -31,13 +31,14 @@ export function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand(
     "extension.warun",
     async () => {
-      let runAll = await vscode.window
+      await vscode.window
         .showQuickPick(["Yes", "No"], {
           placeHolder: "Start all modules ?"
         })
         .then(prev => {
           if (prev === "Yes") {
-            vscode.window.showInformationMessage("yo whaddup ? ");
+            tasks.forEach(task => executeTask(task));
+            return;
           }
         });
 
@@ -56,26 +57,30 @@ export function activate(context: vscode.ExtensionContext) {
 
       let chosenTask = tasks.find(task => task.name === choice);
 
-      if (chosenTask?.filePick) {
-        let file = vscode.window.showOpenDialog({
-          canSelectFiles: true,
-          filters: { "": [`${chosenTask.requiredFileFilters}`] }
-        });
-
-        chosenTask.commandString += " " + file;
-      }
-
-      childProcess.exec(
-        chosenTask?.commandString,
-        (err: any, stdout: any, stderr: any) => {
-          console.log(err);
-        }
-      );
+      executeTask(chosenTask);
       vscode.window.showInformationMessage("Nice");
     }
   );
 
   context.subscriptions.push(disposable);
+
+  async function executeTask(task: Task | undefined) {
+    if (task?.filePick) {
+      await vscode.window
+        .showOpenDialog({
+          canSelectFiles: true,
+          filters: { "": [`${task.requiredFileFilters}`] }
+        })
+        .then(file => (task.commandString += " " + file));
+    }
+
+    childProcess.exec(
+      task?.commandString,
+      (err: any, stdout: any, stderr: any) => {
+        console.log(err);
+      }
+    );
+  }
 }
 
 export function deactivate() {}
