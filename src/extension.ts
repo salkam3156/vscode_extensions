@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 
+const childProcess = require("child_process");
+
 interface Task {
   name: string;
   filePick: boolean;
@@ -11,7 +13,8 @@ const tasks: Task[] = [
   {
     name: "Run JSON Mock Server",
     filePick: true,
-    commandString: `json-server --watch db.json`,
+    //TODO: parametrize in case file is not the last parameter in the command
+    commandString: `json-server --watch`,
     requiredFileFilters: "json"
   },
   {
@@ -22,10 +25,22 @@ const tasks: Task[] = [
   }
 ];
 
+let runEverything: boolean = false;
+
 export function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand(
     "extension.warun",
     async () => {
+      let runAll = await vscode.window
+        .showQuickPick(["Yes", "No"], {
+          placeHolder: "Start all modules ?"
+        })
+        .then(prev => {
+          if (prev === "Yes") {
+            vscode.window.showInformationMessage("yo whaddup ? ");
+          }
+        });
+
       let choice = await vscode.window.showQuickPick(
         tasks.map(task => {
           return task.name;
@@ -42,12 +57,20 @@ export function activate(context: vscode.ExtensionContext) {
       let chosenTask = tasks.find(task => task.name === choice);
 
       if (chosenTask?.filePick) {
-        vscode.window.showOpenDialog({
+        let file = vscode.window.showOpenDialog({
           canSelectFiles: true,
           filters: { "": [`${chosenTask.requiredFileFilters}`] }
         });
+
+        chosenTask.commandString += " " + file;
       }
 
+      childProcess.exec(
+        chosenTask?.commandString,
+        (err: any, stdout: any, stderr: any) => {
+          console.log(err);
+        }
+      );
       vscode.window.showInformationMessage("Nice");
     }
   );
