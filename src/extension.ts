@@ -8,6 +8,7 @@ interface Task {
   requiredFileFilters: string;
   //TODO: parametrize in case file is not the last parameter in the command
   commandString: string;
+  fileSelectionMsg: string;
 }
 
 const tasks: Task[] = [
@@ -15,13 +16,15 @@ const tasks: Task[] = [
     name: "Run JSON Mock Server",
     filePick: true,
     commandString: `json-server --watch`,
-    requiredFileFilters: "json"
+    requiredFileFilters: "json",
+    fileSelectionMsg: "Specify the .json DB file"
   },
   {
     name: "Serve the application",
     filePick: false,
     commandString: "npm run",
-    requiredFileFilters: ""
+    requiredFileFilters: "",
+    fileSelectionMsg: ""
   }
 ];
 
@@ -69,6 +72,7 @@ export function activate(context: vscode.ExtensionContext) {
       await vscode.window
         .showOpenDialog({
           canSelectFiles: true,
+          openLabel: `${task.fileSelectionMsg}`,
           filters: { "": [`${task.requiredFileFilters}`] }
         })
         .then(file => (task.commandString += " " + file));
@@ -78,6 +82,9 @@ export function activate(context: vscode.ExtensionContext) {
       task?.commandString,
       (err: any, stdout: any, stderr: any) => {
         console.log(err);
+        if (stderr) {
+          vscode.window.showErrorMessage(stderr);
+        }
       }
     );
   }
