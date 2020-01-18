@@ -2,9 +2,16 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 
-const commands = [
+interface Task {
+  name: string;
+  filePick: boolean;
+  value: string;
+}
+
+const tasks: Task[] = [
   {
     name: "Run JSON Mock Server",
+    filePick: true,
     value: "json-server --watch db.json"
   }
 ];
@@ -23,16 +30,22 @@ export function activate(context: vscode.ExtensionContext) {
     "extension.warun",
     async () => {
       // The code you place here will be executed every time your command is executed
-      let task = await vscode.window.showQuickPick(
-        commands.map(command => {
-          return command.name;
+      let choice = await vscode.window.showQuickPick(
+        tasks.map(task => {
+          return task.name;
         }),
         {
           placeHolder: "What would you like to run ?"
         }
       );
 
-      // Display a message box to the user
+      if (!choice) {
+        vscode.window.showErrorMessage(
+          `Something went wrong picking ${choice}`
+        );
+        return;
+      }
+
       vscode.window.showInformationMessage("Nice");
     }
   );
