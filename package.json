@@ -3,6 +3,7 @@
   "displayName": "WebApp Runner",
   "description": "Running webapp stuff",
   "version": "0.0.1",
+  "publisher": "tushwintz",
   "engines": {
     "vscode": "^1.41.0"
   },
