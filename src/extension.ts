@@ -28,11 +28,10 @@ export function activate(context: vscode.ExtensionContext) {
       );
 
       if (!choice) {
-        vscode.window.showErrorMessage(
-          `Something went wrong picking ${choice}`
-        );
         return;
       }
+
+      let command = tasks.find(task => task.name === choice)?.value;
 
       vscode.window.showInformationMessage("Nice");
     }
