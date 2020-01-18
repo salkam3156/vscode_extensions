@@ -28,7 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
           return command.name;
         }),
         {
-          placeHolder: "Pick part of the app to run"
+          placeHolder: "What would you like to run ?"
         }
       );
 
