@@ -34,33 +34,37 @@ export function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand(
     "extension.warun",
     async () => {
-      await vscode.window
+      runEverything = await vscode.window
         .showQuickPick(["Yes", "No"], {
           placeHolder: "Start all modules ?"
         })
         .then(prev => {
           if (prev === "Yes") {
             tasks.forEach(task => executeTask(task));
+            return true;
+          } else {
+            return false;
           }
         });
 
-      let choice = await vscode.window.showQuickPick(
-        tasks.map(task => {
-          return task.name;
-        }),
-        {
-          placeHolder: "What would you like to run ?"
+      if (!runEverything) {
+        let choice = await vscode.window.showQuickPick(
+          tasks.map(task => {
+            return task.name;
+          }),
+          {
+            placeHolder: "What would you like to run ?"
+          }
+        );
+
+        if (!choice) {
+          return;
         }
-      );
 
-      if (!choice) {
-        return;
+        let chosenTask = tasks.find(task => task.name === choice);
+
+        executeTask(chosenTask);
       }
-
-      let chosenTask = tasks.find(task => task.name === choice);
-
-      executeTask(chosenTask);
-      vscode.window.showInformationMessage("Nice");
     }
   );
 
