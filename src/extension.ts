@@ -15,7 +15,7 @@ const tasks: Task[] = [
   {
     name: "Run JSON Mock Server",
     filePick: true,
-    commandString: `json-server --watch`,
+    commandString: `json-server --watch inputFile`,
     requiredFileFilters: "json",
     fileSelectionMsg: "Specify the .json DB file"
   },
@@ -70,6 +70,17 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(disposable);
 
+  function replaceInputFileInCommand(
+    command: string,
+    filePath: vscode.Uri[] | undefined
+  ): string {
+    if (filePath) {
+      return command.replace("inputFile", filePath[0].toString());
+    } else {
+      return "";
+    }
+  }
+
   async function executeTask(task: Task | undefined) {
     if (task?.filePick) {
       await vscode.window
@@ -78,7 +89,13 @@ export function activate(context: vscode.ExtensionContext) {
           openLabel: `${task.fileSelectionMsg}`,
           filters: { "": [`${task.requiredFileFilters}`] }
         })
-        .then(file => (task.commandString += " " + file));
+        .then(
+          file =>
+            (task.commandString = replaceInputFileInCommand(
+              task.commandString,
+              file
+            ))
+        );
     }
 
     childProcess.exec(
