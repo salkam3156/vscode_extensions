@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 
 const childProcess = require("child_process");
-
+//TODO: allow preconfiguration to avoid prompting once set up
 interface Task {
   name: string;
   filePick: boolean;
@@ -23,6 +23,13 @@ const tasks: Task[] = [
     name: "Serve the application",
     filePick: false,
     commandString: "npm run",
+    requiredFileFilters: "",
+    fileSelectionMsg: ""
+  },
+  {
+    name: "Run Web API in watch mode",
+    filePick: true,
+    commandString: `dotnet watch run`,
     requiredFileFilters: "",
     fileSelectionMsg: ""
   }
@@ -110,4 +117,4 @@ export function activate(context: vscode.ExtensionContext) {
   }
 }
 
-export function deactivate() {}
+export function deactivate() { }
